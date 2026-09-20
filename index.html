@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compound - the eighth wonder, visualized</title>
+<meta name="description" content="Compound is an interactive compound-interest visualizer: deposits vs interest stacked over time, year-by-year breakdown, and the moment interest outearns you.">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#0c1210; color:#e8f5ee; min-height:100vh; }
+  .hero { min-height:92vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:40px 20px;
+    background:radial-gradient(ellipse 75% 50% at 50% 110%, #34d39922 0%, #065f4614 40%, transparent 70%); }
+  .badge { font-size:12px; letter-spacing:2px; text-transform:uppercase; color:#34d399; border:1px solid #1f4435; border-radius:999px; padding:6px 16px; margin-bottom:26px; }
+  h1 { font-size:clamp(38px,7.5vw,72px); font-weight:800; line-height:1.06;
+    background:linear-gradient(120deg,#d1fae5,#34d399 45%,#059669); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub { font-size:clamp(16px,2.4vw,21px); color:#6f8a7d; max-width:560px; margin-top:20px; line-height:1.55; }
+  .cta { margin-top:38px; display:inline-block; background:linear-gradient(135deg,#34d399,#059669); color:#04120c; font-size:18px; font-weight:700;
+    padding:16px 44px; border-radius:14px; text-decoration:none; box-shadow:0 10px 34px #34d39940; transition:transform .15s ease; }
+  .cta:hover { transform:translateY(-2px); }
+  .feats { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; max-width:900px; margin:0 auto; padding:20px 20px 70px; }
+  .f { background:#111b17; border:1px solid #1e2f27; border-radius:14px; padding:22px; }
+  .f .ic { font-size:26px; }
+  .f h3 { font-size:16px; margin:10px 0 6px; }
+  .f p { font-size:14px; color:#6f8a7d; line-height:1.5; }
+  footer { text-align:center; color:#48604f; font-size:13px; padding:26px; border-top:1px solid #16241d; }
+  footer a { color:#34d399; }
+</style>
+</head>
+<body>
+  <section class="hero">
+    <div class="badge">iLanis App Factory &middot; idea #11</div>
+    <h1>Watch your money<br>snowball.</h1>
+    <p class="sub">Einstein allegedly called compound interest the eighth wonder of the world. Punch in your numbers and see why - deposits and interest, stacked year by year, in one chart that updates as you type.</p>
+    <a class="cta" href="app.html">Run my numbers</a>
+  </section>
+  <section class="feats">
+    <div class="f"><div class="ic">&#128200;</div><h3>Live chart</h3><p>A stacked area chart splits what you deposited from what interest earned. Every keystroke redraws it.</p></div>
+    <div class="f"><div class="ic">&#128197;</div><h3>Year by year</h3><p>A full table of every year: deposits, interest, balance. Scroll to the year the green overtakes you.</p></div>
+    <div class="f"><div class="ic">&#9881;</div><h3>Real knobs</h3><p>Starting amount, monthly deposit, annual return, years, and compounding frequency. Up to 60 years out.</p></div>
+    <div class="f"><div class="ic">&#129518;</div><h3>Just math</h3><p>No sign-up, no data leaves your browser, no hot stock tips. It's a calculator, not a broker.</p></div>
+  </section>
+  <footer>Not financial advice. Everything runs in your browser.<br>
+  Built by the <a href="https://ilanis-agent.github.io/app-factory/">iLanis App Factory</a> &middot; <a href="https://github.com/iLanis-agent/compound">source on GitHub</a></footer>
+</body>
+</html>
