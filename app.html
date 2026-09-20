@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compound - watch your money snowball</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; background:#0c1210; color:#e8f5ee; min-height:100vh; padding-bottom:60px; }
+  header { text-align:center; padding:34px 16px 6px; }
+  header h1 { font-size:30px; font-weight:800; }
+  header h1 span { color:#34d399; }
+  header p { color:#6f8a7d; margin-top:6px; font-size:15px; }
+  .wrap { max-width:1000px; margin:0 auto; padding:0 16px; }
+  .panel { background:#111b17; border:1px solid #1e2f27; border-radius:16px; padding:20px; margin-top:20px; }
+  .controls { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:16px; }
+  label { font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#6f8a7d; display:block; margin-bottom:6px; }
+  .num { display:flex; align-items:center; background:#0c1210; border:1px solid #22352c; border-radius:10px; padding:10px 12px; }
+  .num span { color:#34d399; font-weight:700; margin-right:6px; }
+  .num input { background:none; border:none; outline:none; color:#e8f5ee; font-size:17px; width:100%; font-weight:600; }
+  select { background:#0c1210; border:1px solid #22352c; border-radius:10px; color:#e8f5ee; font-size:15px; padding:11px 12px; width:100%; }
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-top:18px; }
+  .stat { background:#0c1210; border:1px solid #1e2f27; border-radius:12px; padding:14px; }
+  .stat .v { font-size:22px; font-weight:800; }
+  .stat .k { font-size:12px; color:#6f8a7d; margin-top:2px; }
+  .stat.green .v { color:#34d399; }
+  .stat.amber .v { color:#fbbf24; }
+  #chart { width:100%; height:280px; display:block; margin-top:6px; }
+  .legend { display:flex; gap:18px; font-size:13px; color:#6f8a7d; margin-top:8px; }
+  .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px; }
+  #years { margin-top:18px; max-height:240px; overflow-y:auto; border:1px solid #1e2f27; border-radius:12px; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th,td { padding:9px 14px; text-align:right; }
+  th:first-child,td:first-child { text-align:left; }
+  th { position:sticky; top:0; background:#0c1210; color:#6f8a7d; font-size:12px; text-transform:uppercase; letter-spacing:1px; }
+  tr:nth-child(even) td { background:#0e1613; }
+  td.int { color:#34d399; }
+  footer { text-align:center; color:#48604f; font-size:13px; margin-top:36px; }
+  footer a { color:#34d399; }
+</style>
+</head>
+<body>
+<header>
+  <h1>&#128200; <span>Compound</span></h1>
+  <p>The eighth wonder, visualized. Drag the numbers, watch the snowball.</p>
+</header>
+<div class="wrap">
+  <div class="panel">
+    <div class="controls">
+      <div><label>Starting amount</label><div class="num"><span>$</span><input id="p0" type="number" value="10000" min="0" step="500"></div></div>
+      <div><label>Monthly deposit</label><div class="num"><span>$</span><input id="pm" type="number" value="500" min="0" step="50"></div></div>
+      <div><label>Annual return %</label><div class="num"><span>%</span><input id="rate" type="number" value="8" min="0" max="30" step="0.5"></div></div>
+      <div><label>Years</label><div class="num"><span>&#9200;</span><input id="yrs" type="number" value="30" min="1" max="60" step="1"></div></div>
+      <div><label>Compounding</label><select id="freq"><option value="12" selected>Monthly</option><option value="4">Quarterly</option><option value="1">Yearly</option></select></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v" id="sFinal">-</div><div class="k">Final balance</div></div>
+      <div class="stat"><div class="v" id="sContrib">-</div><div class="k">You put in</div></div>
+      <div class="stat green"><div class="v" id="sInterest">-</div><div class="k">Interest earned</div></div>
+      <div class="stat amber"><div class="v" id="sMult">-</div><div class="k">Growth multiple</div></div>
+    </div>
+  </div>
+  <div class="panel">
+    <svg id="chart" viewBox="0 0 960 280" preserveAspectRatio="none"></svg>
+    <div class="legend">
+      <div><i style="background:#1f6f4f"></i>Your deposits</div>
+      <div><i style="background:#34d399"></i>Interest on top</div>
+    </div>
+    <div id="years"></div>
+  </div>
+</div>
+<footer>Not financial advice - just math.<br><a href="index.html">&larr; About</a> &nbsp;|&nbsp; Compound &middot; idea #11 from the iLanis App Factory</footer>
+<script>
+var $=function(id){return document.getElementById(id);};
+function fmt(n){ return '$'+Math.round(n).toLocaleString('en-US'); }
+function simulate(){
+  var p0=Math.max(0,parseFloat($('p0').value)||0);
+  var pm=Math.max(0,parseFloat($('pm').value)||0);
+  var r=Math.max(0,parseFloat($('rate').value)||0)/100;
+  var yrs=Math.min(60,Math.max(1,parseInt($('yrs').value)||1));
+  var f=parseInt($('freq').value);
+  var bal=p0, contrib=p0, rows=[];
+  var periods=yrs*f;
+  for(var i=1;i<=periods;i++){
+    // deposit monthly at each month boundary
+    var deposits=0;
+    if(f===12) deposits=pm;
+    else { var monthsPer=12/f; for(var m=0;m<monthsPer;m++) deposits+=pm; }
+    bal+=deposits; contrib+=deposits;
+    bal*= (1+r/f);
+    if(i%f===0) rows.push({year:i/f, bal:bal, contrib:contrib, interest:bal-contrib});
+  }
+  return {rows:rows, final:bal, contrib:contrib, interest:bal-contrib};
+}
+function render(){
+  var s=simulate();
+  $('sFinal').textContent=fmt(s.final);
+  $('sContrib').textContent=fmt(s.contrib);
+  $('sInterest').textContent=fmt(s.interest);
+  $('sMult').textContent=s.contrib>0 ? (s.final/s.contrib).toFixed(2)+'x' : '-';
+  draw(s);
+  table(s);
+}
+function draw(s){
+  var svg=$('chart'), W=960, H=280, pad=8;
+  var max=Math.max(s.final,1);
+  var n=s.rows.length;
+  var pathC='', pathT='';
+  s.rows.forEach(function(row,i){
+    var x=pad+i*(W-2*pad)/Math.max(n-1,1);
+    var yC=H-pad-(row.contrib/max)*(H-2*pad-30);
+    var yT=H-pad-(row.bal/max)*(H-2*pad-30);
+    pathC+=(i?'L':'M')+x.toFixed(1)+','+yC.toFixed(1)+' ';
+    pathT+=(i?'L':'M')+x.toFixed(1)+','+yT.toFixed(1)+' ';
+  });
+  var base='L'+(W-pad)+','+(H-pad)+' L'+pad+','+(H-pad)+' Z';
+  svg.innerHTML=
+    '<path d="'+pathT+base+'" fill="#34d399" opacity="0.85"/>'+
+    '<path d="'+pathC+base+'" fill="#1f6f4f"/>'+
+    '<path d="'+pathT+'" fill="none" stroke="#6ee7b7" stroke-width="2"/>';
+}
+function table(s){
+  var h='<table><tr><th>Year</th><th>Deposits</th><th>Interest</th><th>Balance</th></tr>';
+  s.rows.forEach(function(row){
+    h+='<tr><td>'+row.year+'</td><td>'+fmt(row.contrib)+'</td><td class="int">'+fmt(row.interest)+'</td><td>'+fmt(row.bal)+'</td></tr>';
+  });
+  $('years').innerHTML=h+'</table>';
+}
+['p0','pm','rate','yrs','freq'].forEach(function(id){ $(id).addEventListener('input',render); });
+render();
+</script>
+</body>
+</html>
